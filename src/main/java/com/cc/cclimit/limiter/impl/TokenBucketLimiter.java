@@ -51,7 +51,7 @@ public class TokenBucketLimiter extends LimiterAbstract {
 
     @Override
     public boolean check(LimitDTO limiterDTO) {
-        System.out.println("进入到TokenBucketLimiter·····");
+        //System.out.println("进入到TokenBucketLimiter·····");
         if(surplus.get() <= 0)
             return true;
         //surplus.getAndIncrement();

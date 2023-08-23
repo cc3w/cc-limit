@@ -3,6 +3,11 @@ package com.cc.cclimit.limiter.impl;
 import com.cc.cclimit.limiter.DTO.LimitDTO;
 import com.cc.cclimit.limiter.LimiterAbstract;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * @Author cc
@@ -33,7 +38,27 @@ public class CounterLimiterRedis extends LimiterAbstract {
     }
 
     public boolean check(int limit) {
-        return false;
+        //分钟级别的时间格式
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String text = simpleDateFormat.format(new Date());
+        ZSetOperations zSetOperations = redisTemplate.opsForZSet();
+
+        try {
+            long waitClearTime = simpleDateFormat.parse(text).getTime();
+            zSetOperations.removeRangeByScore(KEY, 0, waitClearTime);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        Long count = zSetOperations.zCard(KEY);
+        if(count < limit) {
+            //获取当前时间戳
+            long time1 = new Date().getTime();
+            zSetOperations.add(KEY, String.valueOf(time1), time1);
+            return false;
+        } else {
+            return true;
+        }
     }
 
 }

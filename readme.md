@@ -81,6 +81,41 @@ private class DataDelay implements Delayed {
             }
         }, 0, interval, TimeUnit.SECONDS);
     }
-// intervalzhi间隔的时间
+// interval指间隔的时间
+```
+
+
+
+
+
+### 新增redis计数器限流实现
+
+> 主要利用redis的z-set有序集合，z-set集合中存储的成员是由时间戳转换的字符串，分数是分钟级别的时间戳，每次请求都会去删掉当前时间点（分钟级别）之前的key，然后每次请求都会将key集合的大小和limit比较，如果是大于的关系，那么说明已经超出请求次数限制，否则小于，就将他加入集合。具体实现如下：
+
+```java
+  public boolean check(int limit) {
+        //fen'zhogn'j
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String text = simpleDateFormat.format(new Date());
+        ZSetOperations zSetOperations = redisTemplate.opsForZSet();
+
+        try {
+            //获取当前时间（分钟级别）
+            long waitClearTime = simpleDateFormat.parse(text).getTime();
+            zSetOperations.removeRangeByScore(KEY, 0, waitClearTime);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        Long count = zSetOperations.zCard(KEY);
+        if(count < limit) {
+            //获取当前时间戳(毫秒级别)
+            long time1 = new Date().getTime();
+            zSetOperations.add(KEY, String.valueOf(time1), time1);
+            return false;
+        } else {
+            return true;
+        }
+    }
 ```
 
