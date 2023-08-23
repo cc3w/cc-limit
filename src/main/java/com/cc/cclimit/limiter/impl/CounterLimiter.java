@@ -91,8 +91,10 @@ public class CounterLimiter extends LimiterAbstract {
         boolean res = data.value.get() >= limit;
         System.out.println("res的值是 + " + res + "value的值是 +" + data.value.get());
         if (res) {
-            removeDelayKey(key);
-            addDelay(key, data.time);
+            if(data.value.get() == limit) {
+                removeDelayKey(key);
+                addDelay(key, data.time);
+            }
         }
         incr(key, time);
         return res;
