@@ -69,3 +69,18 @@ private class DataDelay implements Delayed {
 
 
 
+### 新增令牌桶限流实现
+
+> 主要利用了单线程定时任务执行器，这个执行定时任务的接口每隔一定时间往令牌桶里加token，每次请求就相当于往令牌桶取token，如果令牌桶此时的token数量小于0，那么它将拒绝请求。
+
+```java
+ private void init() {
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
+            if(surplus.get() < capacity) {
+                surplus.getAndAdd(rate);
+            }
+        }, 0, interval, TimeUnit.SECONDS);
+    }
+// intervalzhi间隔的时间
+```
+
