@@ -36,15 +36,8 @@ public class TokenBucketLimiter extends LimiterAbstract {
     // 剩余的token
     private AtomicInteger surplus = new AtomicInteger(capacity);
 
-    private static TokenBucketLimiter instance;
 
-    public static synchronized TokenBucketLimiter getInstance() {
-        if(instance == null)
-            return new TokenBucketLimiter();
-        return instance;
-    }
-
-    private TokenBucketLimiter() {
+    public TokenBucketLimiter() {
         init();
     }
 
@@ -59,6 +52,7 @@ public class TokenBucketLimiter extends LimiterAbstract {
         return false;
     }
 
+    //@PostConstruct
     private void init() {
         scheduledExecutorService.scheduleWithFixedDelay(() -> {
             if(surplus.get() < capacity) {

@@ -24,7 +24,7 @@ public class LimiterController {
     }
 
     @RequestMapping("/test2")
-    @Limit(limit = 1, time = 2)
+    @Limit(limit = 2, time = 5)
     public String test2() {
         return "test2";
     }

@@ -4,7 +4,9 @@ import com.cc.cclimit.limiter.DTO.LimitDTO;
 import com.cc.cclimit.limiter.LimiterAbstract;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,18 +20,18 @@ import java.util.Date;
  * @Version 1.0
  */
 
+@Component
 public class CounterLimiterRedis extends LimiterAbstract {
 
+    @Resource
+    private RedisTemplate<String, String> redisTemplate;
 
-    RedisTemplate redisTemplate;
 
     static final String KEY = "COUNTER_LIMITER:";
 
-    public CounterLimiterRedis(RedisTemplate redisTemplate) {
-        this.redisTemplate = redisTemplate;
+    public CounterLimiterRedis() {
+
     }
-
-
 
     @Override
     public boolean check(LimitDTO limiterDTO) {
@@ -38,9 +40,11 @@ public class CounterLimiterRedis extends LimiterAbstract {
     }
 
     public boolean check(int limit) {
+
         //分钟级别的时间格式
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String text = simpleDateFormat.format(new Date());
+        System.out.println("redisTemplate的值是" + redisTemplate);
         ZSetOperations zSetOperations = redisTemplate.opsForZSet();
 
         try {

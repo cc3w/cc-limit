@@ -2,7 +2,6 @@ package com.cc.cclimit.handler;
 
 import com.cc.cclimit.limiter.DTO.LimitDTO;
 import com.cc.cclimit.limiter.Limiter;
-import com.cc.cclimit.limiter.impl.CounterLimiter;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,10 +14,15 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
-public class LimiterHandler implements Limiter {
+public class LimiterHandlerDefined implements Limiter {
 
-    static Limiter limiter = CounterLimiter.getInstance();
+    //static Limiter limiter = CounterLimiter.getInstance();
+    private Limiter limiter;
 
+
+    public LimiterHandlerDefined(Limiter r) {
+        this.limiter = r;
+    }
 
     @Override
     public void set(String key, Integer value, long time) {
@@ -46,7 +50,4 @@ public class LimiterHandler implements Limiter {
         return limiter.check(limiterDTO);
     }
 
-    public static void setLimiter(Limiter r) {
-        limiter = r;
-    }
 }

@@ -71,7 +71,7 @@ private class DataDelay implements Delayed {
 
 ### 新增令牌桶限流实现
 
-> 主要利用了单线程定时任务执行器，这个执行定时任务的接口每隔一定时间往令牌桶里加token，每次请求就相当于往令牌桶取token，如果令牌桶此时的token数量小于0，那么它将拒绝请求。
+> 主要利用了单线程定时任务执行器，这个执行定时任务的接口每隔一定时间往令牌桶里加token，每次请求就相当于往令牌桶取`token`，如果令牌桶此时的token数量小于0，那么它将拒绝请求。
 
 ```java
  private void init() {
@@ -88,13 +88,13 @@ private class DataDelay implements Delayed {
 
 
 
-### 新增redis计数器限流实现
+### 新增`redis` 计数器限流实现
 
-> 主要利用redis的z-set有序集合，z-set集合中存储的成员是由时间戳转换的字符串，分数是分钟级别的时间戳，每次请求都会去删掉当前时间点（分钟级别）之前的key，然后每次请求都会将key集合的大小和limit比较，如果是大于的关系，那么说明已经超出请求次数限制，否则小于，就将他加入集合。具体实现如下：
+> 主要利用`redis` 的`z-set` 有序集合，`z-set` 集合中存储的成员是由时间戳转换的字符串，分数是分钟级别的时间戳，每次请求都会去删掉当前时间点（分钟级别）之前的key，然后每次请求都会将`key` 集合的大小和`limit` 比较，如果是大于的关系，那么说明已经超出请求次数限制，否则小于，就将他加入集合。具体实现如下：
 
 ```java
   public boolean check(int limit) {
-        //fen'zhogn'j
+        //分钟级别的时间格式
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String text = simpleDateFormat.format(new Date());
         ZSetOperations zSetOperations = redisTemplate.opsForZSet();
@@ -119,3 +119,16 @@ private class DataDelay implements Delayed {
     }
 ```
 
+
+
+
+
+### 新增滑动窗口限流实现
+
+> 以时间为范围，滑动窗口就是某个时间范围，如果用户的请求在某个范围内超出了这个窗口规定的请求的最大值就拒绝访问。具体实现步骤：受到用户的请求每次都会去获取滑动窗口中的请求的数量，如果超出了最大值就拒绝访问，如果没有，先移动滑动窗口，再将用户请求加入滑动窗口中，并设置过期时间。这个滑动窗口用redis中z-set维护
+
+
+
+### 新增漏斗限流实现
+
+> 漏斗有个出水速率和进水速率，如果进水速率大于出水速率，那么随着时间的推移，水一定会从上面溢出来。具体实现：每次用当前漏斗中的剩余水量减去这段时间流走的水量（这段时间*出水速率），然后再去判断当前剩余水量加1是否大于漏斗容量，如果小于，就接受请求，否则拒绝请求。

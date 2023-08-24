@@ -3,7 +3,10 @@ package com.cc.cclimit.limiter.impl;
 import com.cc.cclimit.limiter.DTO.LimitDTO;
 import com.cc.cclimit.limiter.LimiterAbstract;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
@@ -18,27 +21,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @Description: TODO
  * @Version 1.0
  */
+
 public class CounterLimiter extends LimiterAbstract {
 
     private Map<String, Data> map = new HashMap<>();
     private BlockingQueue<DataDelay> delayQueue = new DelayQueue<>();
-    private boolean state = false;
-
-    private int cnt = 0;
-
-    private static CounterLimiter instance;
-
-    public static CounterLimiter getInstance() {
-        if(instance == null)
-            return new CounterLimiter();
-        return instance;
-    }
 
 
-    private CounterLimiter() {
+    public CounterLimiter() {
         init();
     }
-
 
     @Override
     public void set(String key, Integer value, long time) {
@@ -66,8 +58,6 @@ public class CounterLimiter extends LimiterAbstract {
         }
     }
 
-
-
     @Override
     public boolean check(LimitDTO limiterDTO) {
         //System.out.println("进入到CounterLimiter中来了····");
@@ -76,10 +66,7 @@ public class CounterLimiter extends LimiterAbstract {
         long time = limiterDTO.time;
         if(!map.containsKey(key)) {
             set(key, 1, time);
-            cnt ++;
-//            System.out.println("map和delayQueue的值是" + map + "  ");
-//            System.out.println("key的值是" + key);
-            System.out.println("cnt的值是" + cnt + "map的大小是" + map.size());
+
 //            Set<Map.Entry<String, Data>> entries = map.entrySet();
 //            for(Map.Entry<String, Data> entry : entries)
 //                System.out.println("map中key的值是" + entry.getKey());
@@ -108,7 +95,9 @@ public class CounterLimiter extends LimiterAbstract {
         delayQueue.add(new DataDelay(key, time));
     }
 
-    private void init() {
+    //@PostConstruct
+    public void init() {
+        //System.out.println("进入到init()方法中·····");
         new Thread(() -> {
             while(true) {
                 try {

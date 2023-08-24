@@ -1,7 +1,7 @@
 package com.cc.cclimit.aop;
 
 import com.cc.cclimit.annotation.Limit;
-import com.cc.cclimit.handler.LimiterHandler;
+import com.cc.cclimit.handler.LimiterHandlerDefined;
 import com.cc.cclimit.limiter.DTO.LimitDTO;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -27,7 +27,7 @@ public class LimiterAop {
     HttpServletRequest request;
 
     @Autowired
-    LimiterHandler limiterHandler;
+    LimiterHandlerDefined limiterHandlerDefined;
 
     @Pointcut("@annotation(com.cc.cclimit.annotation.Limit)")
     public void aopPoint() {
@@ -58,7 +58,7 @@ public class LimiterAop {
 
         //System.out.println("aop切面拦截·····key的值是 + " + key);
 
-        boolean result = limiterHandler.check(limitDTO);
+        boolean result = limiterHandlerDefined.check(limitDTO);
 
         if (result) {
             throw new RuntimeException(limiter.msg());
